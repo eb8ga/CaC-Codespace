@@ -1,0 +1,9 @@
+# Automatically set the working directory to the workspace folder
+# when RStudio opens in a GitHub Codespace.
+if (Sys.getenv("CODESPACES") == "true") {
+  workspace <- list.files("/workspaces", full.names = TRUE)[1]
+  if (!is.null(workspace) && dir.exists(workspace)) {
+    setwd(workspace)
+    message("Working directory set to: ", workspace)
+  }
+}
