@@ -1,7 +1,7 @@
 // Config options: https://github.com/rocker-org/devcontainer-templates/tree/main/src/r-ver
 {
   "name": "R Workshop - RStudio",
-  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.4",
+  "image": "ghcr.io/rocker-org/devcontainer/geospatial:4.4",
 
   // Add software
   "features": {
@@ -14,9 +14,9 @@
     "ghcr.io/rocker-org/devcontainer-features/rstudio-server": {}
   },
 
-  // Install system libraries required by the sf package (GDAL, GEOS, PROJ, udunits2),
-  // then install all workshop R packages from CRAN.
-  "postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libgdal-dev libgeos-dev libproj-dev libudunits2-dev && Rscript install.R",
+  // Install remaining workshop R packages.
+  // sf and spatial system libraries are pre-installed in the geospatial image.
+  "postCreateCommand": "Rscript install.R",
 
   // RStudio login credentials (username is always "rstudio")
   "containerEnv": {
