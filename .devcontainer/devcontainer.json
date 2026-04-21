@@ -11,12 +11,12 @@
       "version": "latest"
     },
     // RStudio Server: https://github.com/rocker-org/devcontainer-features/blob/main/src/rstudio-server/README.md
-    "ghcr.io/rocker-org/devcontainer-features/rstudio-server:1": {}
+    "ghcr.io/rocker-org/devcontainer-features/rstudio-server": {}
   },
 
   // Install system libraries required by the sf package (GDAL, GEOS, PROJ, udunits2),
   // then install all workshop R packages from CRAN.
-  "postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libgdal-dev libgeos-dev libproj-dev libudunits2-dev && Rscript \"${containerWorkspaceFolder}/install.R\"",
+  "postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libgdal-dev libgeos-dev libproj-dev libudunits2-dev && Rscript install.R",
 
   // RStudio login credentials (username is always "rstudio")
   "containerEnv": {
