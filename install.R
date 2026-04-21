@@ -8,14 +8,14 @@
 options(repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/jammy/latest"))
 
 packages <- c(
-  "dplyr",           # data manipulation
-  "ggplot2",         # data visualization
-  "splitstackshape", # reshaping / stacking data frames
-  "tidyr",           # tidying data
   "plyr",            # data aggregation and transformation
-  "scales"           # axis scales and formatting for ggplot2
-  # sf is pre-installed in the geospatial base image — do not reinstall here
-  # as it will overwrite the version compiled against the image's PROJ libraries
+  "splitstackshape"  # reshaping / stacking data frames
+  # --- pre-installed in the geospatial base image, do not add back ---
+  # "dplyr",         # data manipulation
+  # "ggplot2",       # data visualization
+  # "tidyr",         # tidying data
+  # "scales",        # axis scales and formatting for ggplot2
+  # "sf"             # spatial data — reinstalling breaks PROJ library linking
 )
 
 install.packages(
