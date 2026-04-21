@@ -1,0 +1,307 @@
+---
+title: "Coding Across the Curriculum June Workshop"
+author: "Elise Heffernan"
+date: "2025-05-26"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+  
+  This dataset was collected by Claire de la Paz, Victoria Vien, and Elise Heffernan in June 2023. We surveyed a 97 plots grid across OHill; each plot was spaced 100 m apart. The data presented below is based on the tree plots, in which we measured the diameter at breast height (DBH) of the plot's central tree, and every tree that fell witin the 5.64 m radius (creating a 100 m2 plot). For each tree survey identified it to species, and assessed how many vines were growing on the tree, recorded as presence/absence.  
+  
+This data is being used with the permission of Elise Heffernan and Claire de la Paz.  
+  
+  
+```{r}
+### test run for June workshop
+
+
+library(dplyr)
+library(ggplot2)
+library(splitstackshape)
+library(tidyr)
+library(sf)
+library(plyr)
+library(scales)
+```
+  
+## Loading the data  
+  
+```{r}
+load("OHillWorkshopMaterials.RData")
+
+```
+  
+You should get two dataframes (latlon, and ohill) and a shapefile.  
+The latlon dataframe has already been joined with ohill, but will be needed later.  
+A shapefile is a specific file type for mapping. It normally has 6 different files, but we have provided the RData file to streamline your end. If you have questions about loading shapefile, look into the sf package.  
+  
+  This data has already been mostly "cleaned" (as that is ideal for students) - this means, the column names are easily understandable, there aren't extraneous columns, and any extra whitespaces have been removed (function: trimws). I prefer column names with mixed capitals and lower case for legibility, but some prefer all lowercase (function: tolower) or uppercase (function: toupper).  
+
+  
+  
+# Canopy cover  
+  
+  Assessing how open the canopy is can be critical to identifying the possible threat of invasive species distribution. Many species will colonize canopy gaps to infiltrate the center of the forest.
+  
+  We used a densiometer to measure canopy cover, which is a convex mirror that you measure canopy cover at each of the 4 cardinal directions. This website will show you what a densiometer looks like and how it works:    
+   https://www.forestry-suppliers.com/Documents/1450_msds.pdf  
+  
+```{r}
+## pulling out canopy cover
+canopy <- ohill %>% dplyr::select(Plot, x, y, Densiometer)
+canopy <- cSplit(canopy, 'Densiometer', sep=",", direction = "wide")  ## can maybe make without a package
+## removing NAs
+canopy <- canopy[complete.cases(canopy), ]
+```
+  
+  
+## Calculate canopy cover  
+
+```{r}
+## calculate canopy cover 
+## 
+canopy$open <- (canopy$Densiometer_1 + canopy$Densiometer_2 + canopy$Densiometer_3 + canopy$Densiometer_4)/4*1.04
+canopy$closed <- 100-canopy$open
+hist(canopy$closed)
+summary(canopy$closed)
+
+## need to remove the outlier (compost site)
+canopy <- subset(canopy, closed >=50)
+hist(canopy$closed, main="Histogram of Canopy Cover", xlab="Percentage of Tree Cover")
+
+```
+  
+  
+# how does the canopy cover change across OHill?  
+  
+  
+  To answer this question we want to make a map and see if there are any identifiable trends. Sometimes, if you just want to get a general idea, you can make an ugly map, and just use ggplot x and y for longitude and latitude, without working with the mapping data (and messing with projections).  
+```{r}
+
+## cheater way:
+
+ggplot(canopy, aes(x=x, y = y, fill = closed)) + 
+  geom_point(shape = 22, size = 5) + 
+  theme_classic()
+```
+  
+you can see that the default ggplot map is very distorted - so we need to use R's GIS  
+  
+## Making a map of canopy cover  
+```{r}
+
+## using the sf package
+
+## loading OHill shapefile
+## ohillshp <- read_sf("filename.shp")
+##  we don't need to load it - but the above code will import the shapefile using all the necessary files - so make sure all the companion files are together
+## check it was imported
+plot(ohillshp)
+
+## mapping with ggplot
+ggplot() + 
+  geom_sf(data = ohillshp, color = "black", fill = "white") + 
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 30,  hjust=1))
+```
+  
+ 
+## Making a shapefile of our points and create a map
+```{r}
+## create a shapefile of canopy data
+canopy.sf <- st_as_sf(canopy, coords = c("x", "y"), remove = FALSE, crs = 4326)
+plot(canopy.sf)  ## points are all correctly spaced now
+
+## map the shapefile onto the OHill map
+ggplot() +
+  geom_sf(data = canopy.sf, aes(color = closed), size = 5) +
+  geom_sf(data = ohillshp, color = "black", fill = NA) +
+  scale_color_gradientn(colors = c("lightyellow",  "forestgreen"), name = "Canopy Cover (%)") +
+  theme_classic()+
+   theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+```
+  
+### So how does canopy cover vary across OHill?   
+  
+  
+  
+  
+# Vines
+  
+## data organization  
+```{r}
+
+### pulling out vine colonization
+vines <- subset(ohill, PlotSize=="100")
+vines$Densiometer <- NULL
+colnames(vines)[13] <- "DBHcm"
+vines$JapaneseHoneysuckle <- as.numeric(vines$JapaneseHoneysuckle)
+vines$DBHcm <- as.numeric(vines$DBHcm)
+
+## cleaning up common names
+# Fixing names
+vines$CommonName <- tolower(vines$CommonName)    ## making them all lower case
+vines$CommonName <- trimws(vines$CommonName)     ## removing white space at end of words 
+vines$CommonName <- as.factor(vines$CommonName)  ## making the common names a factor column
+summary(vines$CommonName)
+
+## renaming errors and proper nouns
+vines$CommonName <- revalue(vines$CommonName, c("american holly" = "American holly",
+                          "american hornbeam" = "American hornbeam",
+                          "chesnut oak" = "chestnut oak", 
+                          "white oak chestnut hybrid" = "white x chestnut oak",
+                          "virginia pine" = "Virginia pine",
+                          "service berry" = "serviceberry",
+                          "mockernut oak" = "mockernut hickory"))
+
+## we will use this data frame later - but easier to pull it out than redo all this cleaning later
+dbh <- vines %>% select(Plot, ScientificName, CommonName, DBHcm)
+
+
+vines <- vines %>% 
+  dplyr::mutate(total = rowSums(pick(Bittersweet:Wisteria), na.rm = T))
+hist(vines$total, main="Histogram of Vine Colonization", xlab="Total number of vine species identified per tree")
+
+
+## convert to long data frame
+vines <- gather(vines, vine, presence, Bittersweet:Wisteria)
+
+```
+  
+ 
+## Does higher DBH mean more vines on the trees?
+```{r}
+
+## does higher DBH mean more vines?
+ggplot(vines, aes(x=DBHcm, y = total)) +
+  geom_point() + 
+  geom_smooth(method = "lm",   ## linear fit
+              se = FALSE) + 
+  theme_bw()
+
+
+```
+  
+ 
+## What are the most common vines?  
+```{r}
+
+## what is the distribution of vines?
+## average (note "summary")
+ggplot(vines, aes(x=vine, y = presence)) + 
+  geom_bar(stat="summary", fill = "steelblue") + 
+  geom_errorbar(stat = "summary", color = "gray40", width = .3) + 
+  theme_bw() 
+
+## total (note "identity")
+ggplot(vines, aes(x=vine, y = presence)) + 
+  geom_bar(stat="identity", fill = "steelblue") + 
+  theme_bw() 
+
+
+```
+  
+ 
+## How is the bittersweet vine colonization distributed across OHill?  
+  Bittersweet is one of the more pervasive and concerning invasives threatening the canopy that we have on OHill.  
+```{r}
+
+
+## Calculate percent colonized for bittersweet
+bittersweet <- vines %>%
+    subset(vine == "Bittersweet") %>%
+    mutate(count = 1) %>%
+  aggregate(cbind(presence, count) ~ Plot + x + y, sum) %>%
+  mutate(bittersweetcol = presence/count*100)
+
+
+
+
+
+```
+# Go to script for MODIFY   
+  
+  
+  
+  
+# Tree distribution
+  
+## Calculating Importance Value  
+  
+  Importance value (IV) assesses what species are important to the forest across the whole area (or specific, lower). The IV balances the importance of many small understory trees with the fewer, but large canopy species, but combining frequency (presence across all plots), with density (species stem count over total stem count), and dominance (total species basal area divided by total basal area). Basal area is the area of the tree trunk at breast height. It is closely correlated with canopy size, and thus we can use it to assess the canopy dominance of trees.
+
+```{r}
+## importance value
+# relative frequency
+# relative density
+# relative dominance
+
+
+# make a factor
+dbh$CommonName <- as.factor(dbh$CommonName)
+
+# Relative Frequency = No. of quadrates the species occurred/Total quadrate occurrences for all species * 100
+# Relative Density = Density of the species/Sum of total density for all species* 100
+# Relative Dominance = Basal Area per hectare/Total basal area of all species * 100
+
+
+## relative frequency   ## number of plots each species is in
+relfreq <- dbh %>%
+  dplyr::select(Plot, CommonName) %>%
+  distinct() %>%
+  mutate(count = 1) %>%                     ## count function was being weird - this is just how I always do counts - much more straight forward
+  aggregate(count ~ CommonName, sum) %>%
+  mutate(relfreq = (count)/97) %>%            ## each plot is 100 m2 and there are 97 plots
+  dplyr::select(CommonName, relfreq)
+
+reldensity <- dbh %>%
+  mutate(count = 1) %>%
+  aggregate(count ~ CommonName, sum) %>%
+  mutate(reldensity = count/1232)   %>%     ## total number of trees (also nrow for dbh)
+  dplyr::select(CommonName, reldensity)    
+
+reldom <- dbh %>%
+  mutate(basalarea = pi*DBHcm^2) %>%         # note - pi is a set constant in r
+  aggregate(basalarea ~ CommonName, sum) %>%
+  mutate(reldom = basalarea/sum(basalarea)) %>%
+  dplyr::select(CommonName, reldom)
+## add select here
+
+IV <- full_join(reldensity,reldom) %>%
+  full_join(relfreq)
+
+IV$importance <- (IV$reldensity + IV$reldom + IV$relfreq)
+
+
+```
+  
+ 
+## What are the important trees on OHill?  
+```{r}
+## uses scales library to wrap names
+ggplot(IV, aes(x=CommonName, y = importance)) +
+  geom_bar(stat="identity", fill = "steelblue") + 
+  theme_bw() +
+  scale_x_discrete(labels = wrap_format(10)) + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+
+ggplot(IV[which(IV$importance > 0.1),], aes(x=CommonName, y = importance)) +
+  geom_bar(stat="identity", fill = "steelblue") + 
+  theme_bw() +
+  scale_x_discrete(labels = wrap_format(10)) + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+
+
+
+
+```
+# Go to script for CREATE  
+
+
+
