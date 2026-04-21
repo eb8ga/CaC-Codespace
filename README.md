@@ -17,8 +17,6 @@ repo-root/
 ├── .Rprofile
 ├── install.R
 ├── workshop_start.R
-├── SurveyOverview.Rmd
-├── Results 1.5.26.csv
 └── README.md
 ```
 
@@ -122,5 +120,3 @@ If participants load spatial data that does not have a coordinate reference syst
 | `install.R` | Installs all R packages — runs automatically on Codespace creation |
 | `workshop_start.R` | Participant-facing startup script — loads packages and data |
 | `.Rprofile` | Sets working directory automatically when RStudio opens |
-| `SurveyOverview.Rmd` | Main workshop analysis file |
-| `Results 1.5.26.csv` | Workshop dataset |
