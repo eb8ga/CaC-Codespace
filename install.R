@@ -12,9 +12,10 @@ packages <- c(
   "ggplot2",         # data visualization
   "splitstackshape", # reshaping / stacking data frames
   "tidyr",           # tidying data
-  "sf",              # spatial data (pre-installed in geospatial image)
   "plyr",            # data aggregation and transformation
   "scales"           # axis scales and formatting for ggplot2
+  # sf is pre-installed in the geospatial base image — do not reinstall here
+  # as it will overwrite the version compiled against the image's PROJ libraries
 )
 
 install.packages(
