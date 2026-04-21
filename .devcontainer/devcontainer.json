@@ -1,29 +1,38 @@
 // Config options: https://github.com/rocker-org/devcontainer-templates/tree/main/src/r-ver
 {
-  "name": "R (rocker/r-ver base)",
-  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.5",
+  "name": "R Workshop - RStudio",
+  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.4",
+
   // Add software
   "features": {
-    // Quarto configuration: https://github.com/rocker-org/devcontainer-features/blob/main/src/quarto-cli/README.md
-	  "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {
-		  "installTinyTex": true,
-      "version": "latest" 
-	  },
-    // RStudio Server configuration: https://github.com/rocker-org/devcontainer-features/blob/main/src/rstudio-server/README.md
-    "ghcr.io/rocker-org/devcontainer-features/rstudio-server": {}
+    // Quarto for R Markdown support: https://github.com/rocker-org/devcontainer-features/blob/main/src/quarto-cli/README.md
+    "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {
+      "installTinyTex": true,
+      "version": "latest"
+    },
+    // RStudio Server: https://github.com/rocker-org/devcontainer-features/blob/main/src/rstudio-server/README.md
+    "ghcr.io/rocker-org/devcontainer-features/rstudio-server:1": {}
   },
-  // Ensure the default RStudio Server port is automatically forwarded
-  "forwardPorts": [
-       8787
-  ],  
+
+  // Install system libraries required by the sf package (GDAL, GEOS, PROJ, udunits2),
+  // then install all workshop R packages from CRAN.
+  "postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libgdal-dev libgeos-dev libproj-dev libudunits2-dev && Rscript \"${containerWorkspaceFolder}/install.R\"",
+
+  // RStudio login credentials (username is always "rstudio")
+  "containerEnv": {
+    "PASSWORD": "workshop2026"
+  },
+
+  // Automatically open RStudio in the browser when the Codespace starts
+  "forwardPorts": [8787],
   "portsAttributes": {
-  	"8787": {
-  		"label": "RStudio",
-  		"requireLocalPort": true,
-  		"onAutoForward": "ignore"
-  	}
+    "8787": {
+      "label": "RStudio",
+      "onAutoForward": "openBrowser"
+    }
   },
+
   "postAttachCommand": {
-      "rstudio-start": "rserver"
+    "rstudio-start": "rserver"
   }
 }
