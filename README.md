@@ -1,6 +1,6 @@
-# Coding Across The Curriculum - Workshop Environment
+# CaC-DATA Workshop Environment
 
-This repository contains a pre-configured RStudio environment for the CaC workshop. Participants launch it as a GitHub Codespace — no local R or RStudio installation required. Everyone works in an identical environment with all packages pre-installed.
+This repository contains a pre-configured RStudio environment for the CaC-DATA workshop. Participants launch it as a GitHub Codespace — no local R or RStudio installation required. Everyone works in an identical environment with all packages pre-installed.
 
 ---
 
@@ -17,9 +17,8 @@ repo-root/
 ├── .Rprofile
 ├── install.R
 ├── workshop_start.R
-├── SurveyOverview.Rmd
-├── Results 1.5.26.csv
-└── README.md
+├── README.md
+└── (workshop files to be added)
 ```
 
 > **Important:** `devcontainer.json` must live inside a `.devcontainer/` folder at the repo root. GitHub will not detect it otherwise.
@@ -57,13 +56,11 @@ Run a prebuild manually before the workshop day. It will re-run automatically on
 
 ### Getting started
 
-Once RStudio opens, run `workshop_start.R` first. It loads all packages and the workshop dataset in the correct order. You can open it from the **Files** pane (bottom-right) or run this in the Console:
+Once RStudio opens, run `workshop_start.R` first. It loads all packages in the correct order. You can open it from the **Files** pane (bottom-right) or run this in the Console:
 
 ```r
 source("workshop_start.R")
 ```
-
-You should see: `Data loaded: X rows, Y columns`
 
 ---
 
@@ -89,7 +86,7 @@ All packages are installed automatically when the Codespace is created.
 
 `plyr` and `dplyr` share function names (`filter`, `mutate`, `summarize`, etc.). Whichever package loads last takes priority, silently overriding the other. **`plyr` must always be loaded before `dplyr`.**
 
-`workshop_start.R` and `SurveyOverview.Rmd` both load packages in the correct order. If participants write their own scripts, remind them to follow this order:
+`workshop_start.R` loads packages in the correct order. If participants write their own scripts, remind them to follow this order:
 
 ```r
 library(plyr)   # first
@@ -102,7 +99,7 @@ Codespaces stop automatically after **30 minutes of inactivity**. Participants s
 
 ### Working directory
 
-The `.Rprofile` in this repo automatically sets the working directory to the repo root when RStudio opens. This means `read.csv("Results 1.5.26.csv")` works without any path changes.
+The `.Rprofile` in this repo automatically sets the working directory to the repo root when RStudio opens. This means workshop data files can be loaded by filename alone, without specifying a full path.
 
 ### Each participant gets their own environment
 
