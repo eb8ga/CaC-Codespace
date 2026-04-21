@@ -1,6 +1,6 @@
-# CaC-DATA Workshop Environment
+# Coding Across the Curriculum Workshop Environment
 
-This repository contains a pre-configured RStudio environment for the CaC-DATA workshop. Participants launch it as a GitHub Codespace — no local R or RStudio installation required. Everyone works in an identical environment with all packages pre-installed.
+This repository contains a pre-configured RStudio environment for the CaC workshop. Participants launch it as a GitHub Codespace — no local R or RStudio installation required. Everyone works in an identical environment with all packages pre-installed.
 
 ---
 
@@ -46,13 +46,6 @@ Run a prebuild manually before the workshop day. It will re-run automatically on
 2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**
 3. Wait for the environment to build (first time only: ~10 minutes without prebuilds, ~30 seconds with)
 4. RStudio will open automatically in your browser
-
-### Login credentials
-
-| Field | Value |
-|---|---|
-| Username | `rstudio` |
-| Password | `workshop2026` |
 
 ### Getting started
 
