@@ -1,6 +1,6 @@
-# CaC-DATA Workshop Environment
+# Coding Across The Curriculum - Workshop Environment
 
-This repository contains a pre-configured RStudio environment for the CaC-DATA workshop. Participants launch it as a GitHub Codespace — no local R or RStudio installation required. Everyone works in an identical environment with all packages pre-installed.
+This repository contains a pre-configured RStudio environment for the CaC workshop. Participants launch it as a GitHub Codespace — no local R or RStudio installation required. Everyone works in an identical environment with all packages pre-installed.
 
 ---
 
