@@ -13,7 +13,6 @@ library(scales)
 library(sf)
 
 # --- Load the workshop dataset ----------------------------------------------
-survey <- read.csv("Results 1.5.26.csv", na.strings = "", header = TRUE)
-
-# Quick check — should print number of rows and columns
-cat("Data loaded:", nrow(survey), "rows,", ncol(survey), "columns\n")
+# Update the filename below when the workshop data file is added to the repo.
+# survey <- read.csv("your-data-file.csv", na.strings = "", header = TRUE)
+# cat("Data loaded:", nrow(survey), "rows,", ncol(survey), "columns\n")
